@@ -98,7 +98,7 @@ export default function WheelCanvas() {
     if (!canvas) return;
 
     // 逻辑尺寸（保持300x300的工作坐标）
-    const logicalSize = 300;
+    const logicalSize = wheelSize;
     canvas.width = wheelSize;
     canvas.height = wheelSize;
 
@@ -115,10 +115,18 @@ export default function WheelCanvas() {
 
   return (
     <div className="text-center">
+      <div className="relative" style={{width:`${wheelSize}px`,height:`${wheelSize}px`}}>
+        <div className="absolute box-content inset-0 mx-auto my-auto w-[80px] h-[80px]">
+          <div className="absolute  inset-0 w-[80px] h-[80px]  rotate-[-45deg] bg-black z-2"
+          style={{borderRadius:"50% 0px 50% 50%"}}
+          ></div>
+          <div style={{textShadow:"rgb(0, 0, 0) 0px 1px 4px"}} className="absolute inset-0 w-[80px] h-[80px] rounded-[50%] z-3  size-[16px] font-bold block bg-transparent select-noen  tracking-[0.7px] leading-[80px] text-center">SPIN</div>
+        </div>
       <canvas
         ref={canvasRef}
         className="mx-auto border rounded-full shadow-lg"
       />
+      </div>
       <button
         onClick={handleSpin}
         disabled={isSpinning}
