@@ -1,14 +1,16 @@
 "use client";
+import { usePrizeStore } from "@/store/prize-store";
 import { useEffect, useRef, useState } from "react";
 
 export default function WheelCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const rotationAngle = useRef(0);
-
+  const [wheelSize, setWheelSize] = useState(300); // 默认值
+  const { prizes, currentWinner, addPrize, removePrize, setWinner } =
+    usePrizeStore();
   // 绘制转盘（修复尺寸问题）
   const drawWheel = (ctx: CanvasRenderingContext2D, angle: number = 0) => {
-    const prizes = ["Yes", "No"];
     const centerX = ctx.canvas.width / 2;
     const centerY = ctx.canvas.height / 2;
     const displaySize = Math.min(ctx.canvas.width, ctx.canvas.height); // 统一尺寸基准
@@ -16,7 +18,7 @@ export default function WheelCanvas() {
 
     // 清除画布
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
+
     // 应用旋转
     ctx.save();
     ctx.translate(centerX, centerY);
@@ -24,10 +26,10 @@ export default function WheelCanvas() {
     ctx.translate(-centerX, -centerY);
 
     // 绘制扇形
-    prizes.forEach((text, i) => {
+    prizes.forEach((prize, i) => {
       const startAngle = (i * Math.PI * 2) / prizes.length;
       const endAngle = ((i + 1) * Math.PI * 2) / prizes.length;
-      
+
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.arc(centerX, centerY, radius, startAngle, endAngle);
@@ -41,16 +43,15 @@ export default function WheelCanvas() {
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
       ctx.font = `bold ${radius * 0.15}px Arial`; // 动态字体大小
-      ctx.fillText(text, radius * 0.5, radius * 0.05);
+      ctx.fillText(prize.name, radius * 0.5, radius * 0.05);
       ctx.restore();
     });
 
     ctx.restore();
   };
-
   const handleSpin = () => {
     if (isSpinning || !canvasRef.current) return;
-    
+
     const ctx = canvasRef.current.getContext("2d");
     if (!ctx) return;
 
@@ -65,13 +66,15 @@ export default function WheelCanvas() {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
-      // 弹性缓动
-      const elasticProgress = progress < 0.5 
-        ? 0.5 * Math.pow(2, 20 * progress - 10)
-        : 0.5 * (2 - Math.pow(2, -20 * progress + 10));
 
-      rotationAngle.current = startAngle + (targetAngle - startAngle) * elasticProgress;
+      // 弹性缓动
+      const elasticProgress =
+        progress < 0.5
+          ? 0.5 * Math.pow(2, 20 * progress - 10)
+          : 0.5 * (2 - Math.pow(2, -20 * progress + 10));
+
+      rotationAngle.current =
+        startAngle + (targetAngle - startAngle) * elasticProgress;
       drawWheel(ctx, rotationAngle.current);
 
       if (progress < 1) {
@@ -79,7 +82,9 @@ export default function WheelCanvas() {
       } else {
         // 转盘结束
         setIsSpinning(false);
-        const prizeIndex = Math.floor(((rotationAngle.current % 360) + 90) % 360 / 180);
+        const prizeIndex = Math.floor(
+          (((rotationAngle.current % 360) + 90) % 360) / 180
+        );
         alert(`Result: ${["Yes", "No"][prizeIndex]}`);
       }
     };
@@ -91,26 +96,26 @@ export default function WheelCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     // 逻辑尺寸（保持300x300的工作坐标）
     const logicalSize = 300;
-    canvas.width = logicalSize;
-    canvas.height = logicalSize;
-    
+    canvas.width = wheelSize;
+    canvas.height = wheelSize;
+
     // 显示尺寸（通过CSS控制）
     canvas.style.width = `${logicalSize}px`;
     canvas.style.height = `${logicalSize}px`;
-    
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     // 初始化绘制
     drawWheel(ctx);
   }, []);
 
   return (
     <div className="text-center">
-      <canvas 
+      <canvas
         ref={canvasRef}
         className="mx-auto border rounded-full shadow-lg"
       />
