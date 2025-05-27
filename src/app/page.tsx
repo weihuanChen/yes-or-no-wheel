@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import PickerWheel from "./picker-wheel/page";
+import PickerWheel from "./picker-wheel";
 
 export default function Home() {
   return (
