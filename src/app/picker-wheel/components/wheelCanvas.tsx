@@ -7,8 +7,11 @@ export default function WheelCanvas() {
   const [isSpinning, setIsSpinning] = useState(false);
   const rotationAngle = useRef(0);
   const [wheelSize, setWheelSize] = useState(300); // 默认值
-  const { prizes, currentWinner, addPrize, removePrize, setWinner } =
-    usePrizeStore();
+  const EGG_ANGLE_START = 45; // 彩蛋开始角度
+  const EGG_ANGLE_END = 180; // 彩蛋结束角度
+  const CANVAS_EGG_START = (EGG_ANGLE_START + 90) % 360;
+  const CANVAS_EGG_END = (EGG_ANGLE_END + 90) % 360;
+  const { prizes } = usePrizeStore();
   // 绘制转盘（修复尺寸问题）
   const drawWheel = (ctx: CanvasRenderingContext2D, angle: number = 0) => {
     const centerX = ctx.canvas.width / 2;
@@ -46,9 +49,21 @@ export default function WheelCanvas() {
       ctx.fillText(prize.name, radius * 0.5, radius * 0.05);
       ctx.restore();
     });
-
+    // 测试：绘制彩蛋区域
+    // ctx.fillStyle = "rgba(255, 255, 0, 0.3)";
+    // ctx.beginPath();
+    // ctx.moveTo(centerX, centerY);
+    // ctx.arc(
+    //   centerX,
+    //   centerY,
+    //   radius,
+    //   (CANVAS_EGG_START * Math.PI) / 180,
+    //   (CANVAS_EGG_END * Math.PI) / 180
+    // );
+    ctx.fill();
     ctx.restore();
   };
+  // 旋转代码
   const handleSpin = () => {
     if (isSpinning || !canvasRef.current) return;
 
@@ -57,6 +72,8 @@ export default function WheelCanvas() {
 
     setIsSpinning(true);
     const startAngle = rotationAngle.current;
+    //const targetAngle = startAngle + 5 * 360 + (EGG_ANGLE_START + 0.5);
+    // 转五圈+随机角度
     const targetAngle = startAngle + 1800 + Math.random() * 360;
 
     let startTime: number | null = null;
@@ -82,8 +99,10 @@ export default function WheelCanvas() {
       } else {
         // 转盘结束
         setIsSpinning(false);
+        const physicalAngle = ((rotationAngle.current % 360) + 360) % 360;
+
         const prizeIndex = Math.floor(
-          (((rotationAngle.current % 360) + 90) % 360) / 180
+          (((physicalAngle % 360) + 90) % 360) / 180
         );
         alert(`Result: ${["Yes", "No"][prizeIndex]}`);
       }
@@ -92,7 +111,7 @@ export default function WheelCanvas() {
     requestAnimationFrame(animateFrame);
   };
 
-  // 初始化Canvas（关键修复）
+  // 初始化Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -115,17 +134,26 @@ export default function WheelCanvas() {
 
   return (
     <div className="text-center">
-      <div className="relative" style={{width:`${wheelSize}px`,height:`${wheelSize}px`}}>
+      <div
+        className="relative"
+        style={{ width: `${wheelSize}px`, height: `${wheelSize}px` }}
+      >
         <div className="absolute box-content inset-0 mx-auto my-auto w-[80px] h-[80px]">
-          <div className="absolute  inset-0 w-[80px] h-[80px]  rotate-[-45deg] bg-black z-2"
-          style={{borderRadius:"50% 0px 50% 50%"}}
+          <div
+            className="absolute  inset-0 w-[80px] h-[80px]  rotate-[-45deg] bg-black z-2"
+            style={{ borderRadius: "50% 50% 50% 0" }}
           ></div>
-          <div style={{textShadow:"rgb(0, 0, 0) 0px 1px 4px"}} className="absolute inset-0 w-[80px] h-[80px] rounded-[50%] z-3  size-[16px] font-bold block bg-transparent select-noen  tracking-[0.7px] leading-[80px] text-center">SPIN</div>
+          <div
+            style={{ textShadow: "rgb(0, 0, 0) 0px 1px 4px" }}
+            className="absolute inset-0 w-[80px] h-[80px] rounded-[50%] z-3  size-[16px] font-bold block bg-transparent select-noen  tracking-[0.7px] leading-[80px] text-center text-white"
+          >
+            SPIN
+          </div>
         </div>
-      <canvas
-        ref={canvasRef}
-        className="mx-auto border rounded-full shadow-lg"
-      />
+        <canvas
+          ref={canvasRef}
+          className="mx-auto border rounded-full shadow-lg"
+        />
       </div>
       <button
         onClick={handleSpin}
