@@ -1,6 +1,7 @@
 ---
 name: "feature"
 description: "用于发布协作任务计划"
+assignees: []
 ---
 
 # 任务计划
