@@ -1,6 +1,9 @@
-# picker-wheel计划表
+---
+name: 2-feature
+description: 用于发布协作任务计划
+---
 
-## 任务计划
+# 任务计划
   - [ ] 转盘设置功能：含奖池区域配置（input number set）、标题描述设置（title input）、描述设置（description input）、重制抽奖结果（reset button）
   - [ ] 抽奖结果记录：yes or no or egg需要存储记录
   - [ ] 音频文件导入：音频文件已备好（两组文件，需调试使用）
