@@ -1,6 +1,6 @@
 ---
-name: 2-feature
-description: 用于发布协作任务计划
+name: "feature"
+description: "用于发布协作任务计划"
 ---
 
 # 任务计划
